@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import Wrapper from "../assets/wrappers/RegisterPage";
 import { Logo, FormRow, Alert } from "../components";
 import { useAppContext } from "../context/appContext";
-
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 const initialState = {
   name: "",
   email: "",
@@ -16,11 +17,29 @@ function Register() {
   //使用useAppContext钩子，获取全局状态
   // const state = useAppContext();
   // console.log(state);
-  const { isLodaing, showAlert, displayAlert } = useAppContext();
+  const navigate = useNavigate();
+  //从全局状态中获取user,isLoading,showAlert,displayAlert,registerUser
+  const {
+    user,
+    isLoading,
+    showAlert,
+    displayAlert,
+    setupUser,
+  } = useAppContext();
+
+  //useEffect钩子，监听user状态，如果user状态发生变化，跳转到首页
+  useEffect(() => {
+    if (user) {
+      setTimeout(() => {
+        console.log("+++");
+        navigate("/");
+      }, 500);
+    }
+  }, [user, navigate]);
 
   const handleChange = (e) => {
-    console.log(e.target.name);
-    //动态更新状态中的值，e.traget.name对应form表单中每一项
+    // console.log(e.target.name);
+    //动态更新状态中的值，e.target.name对应form表单中每一项
     setValues({ ...values, [e.target.name]: e.target.value });
   };
 
@@ -33,7 +52,22 @@ function Register() {
       displayAlert();
       return;
     }
-    console.log(values);
+    //如果是注册用户，调用registerUser方法
+    const currentUser = { name, email, password };
+    if (isMember) {
+      setupUser({
+        currentUser,
+        endPoint: "login",
+        alertText: "User Logged In! Redirecting...",
+      });
+    } else {
+      //如果不是注册用户，调用registerUser方法,registerUser方法在appContext中
+      setupUser({
+        currentUser,
+        endPoint: "register",
+        alertText: "User Created! Redirecting...",
+      });
+    }
   };
 
   // 切换注册登录
@@ -72,7 +106,7 @@ function Register() {
           handleChange={handleChange}
         />
 
-        <button type="submit" className="btn btn-block">
+        <button type="submit" className="btn btn-block" disabled={isLoading}>
           submit
         </button>
         <p>

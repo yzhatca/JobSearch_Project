@@ -1,15 +1,31 @@
 //用于存放全局状态
 import React, { useReducer, useContext } from "react";
+import axios from "axios";
 //引入action配合Reducer使用，action作为Reducer中的dispatch的参数
-import { CLEAR_ALERT, DISPLAY_ALERT } from "./actions";
+import {
+  CLEAR_ALERT,
+  DISPLAY_ALERT,
+  SETUP_USER_SUCCESS,
+  SETUP_USER_BEGIN,
+  SETUP_USER_ERROR,
+} from "./actions";
 
 import reducer from "./reducers";
+
+const user = localStorage.getItem("user");
+const token = localStorage.getItem("token");
+const userLocation = localStorage.getItem("location");
 
 const initialState = {
   isLoading: false,
   showAlert: false,
   alertText: "",
   alertType: "",
+  //user用于存放用户信息，token用于存放用户的token，userLocation用于存放用户的位置信息
+  user: user ? JSON.parse(user) : null,
+  token: token,
+  userLocation: userLocation || null,
+  jobLocation: userLocation || null,
 };
 const AppContext = React.createContext();
 //AppProvider用于给子组件提供所需要的全局context,AppProvider接收children作为参数，
@@ -32,6 +48,49 @@ const AppProvider = ({ children }) => {
     }, 3000);
   };
 
+  //将用户信息存入到浏览器的local storage
+  const addUserToLocalStorage = ({ user, token, location }) => {
+    localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("token", token);
+    localStorage.setItem("location", location);
+  };
+
+  const removeUserFromLocalStorage = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    localStorage.removeItem("location");
+  };
+
+  const setupUser = async ({ currentUser, endPoint, alertText }) => {
+    // dispatch 登录action
+    dispatch({ type: SETUP_USER_BEGIN });
+    // try catch 发送get请求，如果成功获取数据库中的用户信息，则登陆成功
+    try {
+      //这里的currentUser是从Register.js中传递过来的
+      //通过axios.post()方法访问后端的api，注册用户
+      const { data } = await axios.post(
+        `/api/v1/auth/${endPoint}`,
+        currentUser
+      );
+      const { user, token, location } = data;
+       //发送action到reducers.js中
+      dispatch({
+        type: SETUP_USER_SUCCESS,
+        payload: { user, token, location, alertText },
+      });
+      addUserToLocalStorage({ user, token, location });
+    } catch (error) {
+      console.log(error);
+      dispatch({
+        type: SETUP_USER_ERROR,
+        payload: {
+          msg: error.response.data.msg,
+        },
+      });
+    }
+    clearAlert();
+  };
+
   return (
     // 把定义的全局状态传给子组件
     <AppContext.Provider
@@ -39,6 +98,9 @@ const AppProvider = ({ children }) => {
         ...state,
         displayAlert,
         clearAlert,
+        // registerUser,
+        // loginUser,
+        setupUser,
       }}
     >
       {children}
