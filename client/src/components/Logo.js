@@ -4,7 +4,7 @@ import logo from "../../src/assets/images/logo.svg";
 export default function Logo() {
   return (
     <div>
-      <img src={logo} alt="joblify" className="logo" />
+      <img src={logo} alt="joblfiy" className="logo" />
     </div>
   );
 }

@@ -31,7 +31,7 @@ function Register() {
   useEffect(() => {
     if (user) {
       setTimeout(() => {
-        console.log("+++");
+        console.log("useEffect");
         navigate("/");
       }, 500);
     }

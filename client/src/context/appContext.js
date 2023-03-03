@@ -8,6 +8,8 @@ import {
   SETUP_USER_SUCCESS,
   SETUP_USER_BEGIN,
   SETUP_USER_ERROR,
+  TOGGLE_SIDEBAR,
+  LOGOUT_USER,
 } from "./actions";
 
 import reducer from "./reducers";
@@ -19,6 +21,7 @@ const userLocation = localStorage.getItem("location");
 const initialState = {
   isLoading: false,
   showAlert: false,
+  showSidebar: false,
   alertText: "",
   alertType: "",
   //user用于存放用户信息，token用于存放用户的token，userLocation用于存放用户的位置信息
@@ -73,7 +76,7 @@ const AppProvider = ({ children }) => {
         currentUser
       );
       const { user, token, location } = data;
-       //发送action到reducers.js中
+      //发送action到reducers.js中
       dispatch({
         type: SETUP_USER_SUCCESS,
         payload: { user, token, location, alertText },
@@ -91,6 +94,16 @@ const AppProvider = ({ children }) => {
     clearAlert();
   };
 
+  const logoutUser = () => {
+    removeUserFromLocalStorage();
+    dispatch({
+      type: LOGOUT_USER,
+    });
+  };
+  const toggleSidebar = () => {
+    dispatch({ type: TOGGLE_SIDEBAR });
+  };
+
   return (
     // 把定义的全局状态传给子组件
     <AppContext.Provider
@@ -101,6 +114,8 @@ const AppProvider = ({ children }) => {
         // registerUser,
         // loginUser,
         setupUser,
+        toggleSidebar,
+        logoutUser,
       }}
     >
       {children}
