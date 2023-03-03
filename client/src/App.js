@@ -2,7 +2,7 @@
 // import Wrapper from '../assets/wrappers/LandingPage';
 // import { useAppContext } from '../context/appContext';
 import React from "react";
-import { Error, Dashboard, Landing, Register } from "./pages";
+import { Error, Landing, Register } from "./pages";
 import { BrowserRouter, Routes, Link, Route } from "react-router-dom";
 
 import "./App.css"
@@ -18,7 +18,7 @@ const App = () => {
 
       <Routes>
         {/* 默认路径 */}
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<div>DashBoard</div>} />
         <Route path="/register" element={<Register />} />
         <Route path="/landing" element={<Landing />} />
         {/* 无法匹配的所有路由用*标识 */}
