@@ -10,6 +10,9 @@ import {
   SETUP_USER_ERROR,
   TOGGLE_SIDEBAR,
   LOGOUT_USER,
+  UPDATE_USER_BEGIN,
+  UPDATE_USER_SUCCESS,
+  UPDATE_USER_ERROR,
 } from "./actions";
 
 import reducer from "./reducers";
@@ -40,6 +43,39 @@ const AppProvider = ({ children }) => {
   //   const [state, setState] = useState(initialState);
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  // axios
+  const authFetch = axios.create({
+    baseURL: "/api/v1/",
+  });
+
+  //interceptors 是拦截器机制，用于在请求或响应被发送或接收之前，对其进行一些预处理或者后处理
+  //interceptors 对象包含两个属性：request 和 response，分别代表请求和响应的拦截器。
+  //每个属性都包含两个方法：use 和 eject。其中，use 方法用于添加拦截器，eject 方法用于移除拦截器。
+  // response interceptor
+  authFetch.interceptors.request.use(
+    (config) => {
+      config.headers["Authorization"] = `Bearer ${state.token}`;
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
+    }
+  );
+  // response interceptor
+  authFetch.interceptors.response.use(
+    (response) => {
+      return response;
+    },
+    (error) => {
+      console.log(error.response);
+      if (error.response.status === 401) {
+        logoutUser();
+        console.log("AUTH ERROR");
+      }
+      return Promise.reject(error);
+    }
+  );
+
   const displayAlert = () => {
     dispatch({ type: DISPLAY_ALERT });
     clearAlert();
@@ -48,7 +84,7 @@ const AppProvider = ({ children }) => {
   const clearAlert = () => {
     setTimeout(() => {
       dispatch({ type: CLEAR_ALERT });
-    }, 3000);
+    }, 800);
   };
 
   //将用户信息存入到浏览器的local storage
@@ -94,6 +130,29 @@ const AppProvider = ({ children }) => {
     clearAlert();
   };
 
+  const updateUser = async (currentUser) => {
+    dispatch({ type: UPDATE_USER_BEGIN });
+    try {
+      //组件向后端发送patch请求，更新用户信息
+      const { data } = await authFetch.patch("/auth/updateUser", currentUser);
+      const { user, location, token } = data;
+
+      dispatch({
+        type: UPDATE_USER_SUCCESS,
+        payload: { user, location, token },
+      });
+      addUserToLocalStorage({ user, location, token });
+    } catch (error) {
+      if (error.response.status !== 401) {
+        dispatch({
+          type: UPDATE_USER_ERROR,
+          payload: { msg: error.response.data.msg },
+        });
+      }
+    }
+    clearAlert();
+  };
+
   const logoutUser = () => {
     removeUserFromLocalStorage();
     dispatch({
@@ -116,6 +175,7 @@ const AppProvider = ({ children }) => {
         setupUser,
         toggleSidebar,
         logoutUser,
+        updateUser,
       }}
     >
       {children}

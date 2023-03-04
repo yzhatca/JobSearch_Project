@@ -44,6 +44,11 @@ const userSchema = new mongoose.Schema({
 
 // userSchema在保存之前执行的函数，只有在save()和create()方法中才会触发
 userSchema.pre("save", async function () {
+  //查看哪个字段被修改了
+  console.log(this.modifiedPaths());
+  console.log(this.isModified("password"));
+  //如果密码没有被修改，就不需要再次加密
+  if (!this.isModified("password")) return;
   //salt是一个随机的字符串，用于增加哈希值的复杂性，增加密码破解的难度。通过使用不同的salt，
   //即使两个用户使用了相同的密码，也会生成不同的哈希值，这增加了密码破解的难度。在代码中，
   //salt的长度为10，表示使用10个字符的随机字符串作为salt。
@@ -62,8 +67,8 @@ userSchema.methods.createJWT = function () {
 };
 
 userSchema.methods.comparePassword = async function (enteredPassword) {
-    const isMatch = await bcrypt.compare(enteredPassword, this.password);
-    return isMatch;
-}
+  const isMatch = await bcrypt.compare(enteredPassword, this.password);
+  return isMatch;
+};
 
 export default mongoose.model("User", userSchema);

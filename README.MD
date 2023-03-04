@@ -2286,6 +2286,8 @@ appContext.js;
 
 axios.defaults.headers['Authorization'] = `Bearer ${state.token}`;
 ```
+坏处：如果程序中还有向其他API发送的请求，这将会把token同样发送到其他api的服务端
+
 
 #### Axios - Setup Instance
 

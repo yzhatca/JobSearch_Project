@@ -52,7 +52,7 @@ function Register() {
       displayAlert();
       return;
     }
-    //如果是注册用户，调用registerUser方法
+    //如果是注册用户，调用loginUser方法,loginUser方法在appContext中
     const currentUser = { name, email, password };
     if (isMember) {
       setupUser({

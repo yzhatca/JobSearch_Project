@@ -2,7 +2,6 @@ import User from "../model/User.js";
 import { StatusCodes } from "http-status-codes";
 import { BadRequestError, UnauthenticatedError } from "../errors/index.js";
 
-
 const register = async (req, res) => {
   //安装express-async-errors'包后，可以不用try catch
   // try {
@@ -47,21 +46,40 @@ const login = async (req, res) => {
     throw new BadRequestError("Please provide email and password");
   }
   //设置select("+password")，+password表示查询数据库时，密码字段会被返回
-  const user = await User.findOne({email}).select("+password");
-  if(!user){
+  const user = await User.findOne({ email }).select("+password");
+  if (!user) {
     throw new UnauthenticatedError("Invalid credentials");
   }
   const isPasswordCorrect = await user.comparePassword(password);
-  if(!isPasswordCorrect){
+  if (!isPasswordCorrect) {
     throw new UnauthenticatedError("Invalid credentials");
   }
   const token = user.createJWT();
   //设置user.password = undefined，不返回密码
   user.password = undefined;
-  res.status(StatusCodes.OK).json({ user, token,location:user.location });
+  res.status(StatusCodes.OK).json({ user, token, location: user.location });
 };
-const updateUser = (req, res) => {
-  res.send("updateUser");
+const updateUser = async (req, res) => {
+  const { name, email, lastName, location } = req.body;
+  if (!email || !name || !lastName || !location) {
+    throw new BadRequestError("Please provide all values");
+  }
+  const user = await User.findOne({ _id: req.user.userId });
+
+  user.email = email;
+  user.name = name;
+  user.lastName = lastName;
+  user.location = location;
+
+  await user.save();
+
+  //optional choice
+  const token = user.createJWT();
+  res.status(StatusCodes.OK).json({
+    user,
+    token,
+    location: user.location,
+  });
 };
 
 export { register, login, updateUser };
