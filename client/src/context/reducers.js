@@ -1,12 +1,6 @@
 import {
   DISPLAY_ALERT,
   CLEAR_ALERT,
-  // REGISTER_USER_BEGIN,
-  // REGISTER_USER_SUCCESS,
-  // REGISTER_USER_ERROR,
-  // LOGIN_USER_SUCCESS,
-  // LOGIN_USER_BEGIN,
-  // LOGIN_USER_ERROR,
   SETUP_USER_BEGIN,
   SETUP_USER_SUCCESS,
   SETUP_USER_ERROR,
@@ -15,6 +9,18 @@ import {
   UPDATE_USER_BEGIN,
   UPDATE_USER_SUCCESS,
   UPDATE_USER_ERROR,
+  HANDLE_CHANGE,
+  CLEAR_VALUES,
+  CREATE_JOB_BEGIN,
+  CREATE_JOB_SUCCESS,
+  CREATE_JOB_ERROR,
+  GET_JOBS_BEGIN,
+  GET_JOBS_SUCCESS,
+  SET_EDIT_JOB,
+  EDIT_JOB_BEGIN,
+  EDIT_JOB_SUCCESS,
+  EDIT_JOB_ERROR,
+  DELETE_JOB_BEGIN,
 } from "./actions";
 import { initialState } from "./appContext";
 
@@ -115,63 +121,102 @@ const reducer = (state, action) => {
       showSidebar: !state.showSidebar,
     };
   }
-  // if (action.type === REGISTER_USER_BEGIN) {
-  //   return {
-  //     ...state,
-  //     isLoading: true,
-  //   };
-  // }
-  // if (action.type === REGISTER_USER_SUCCESS) {
-  //   return {
-  //     ...state,
-  //     isLoading: false,
-  //     token: action.payload.token,
-  //     user: action.payload.user,
-  //     userLocation: action.payload.location,
-  //     jobLocation: action.payload.location,
-  //     showAlert: true,
-  //     alertType: "success",
-  //     alertText: "User Created! Redirecting...",
-  //   };
-  // }
-  // if (action.type === REGISTER_USER_ERROR) {
-  //   return {
-  //     ...state,
-  //     isLoading: false,
-  //     showAlert: true,
-  //     alertType: "danger",
-  //     alertText: action.payload.msg,
-  //   };
-  // }
-  // if (action.type === LOGIN_USER_BEGIN) {
-  //   return {
-  //     ...state,
-  //     isLoading: true,
-  //   };
-  // }
-  // if (action.type === LOGIN_USER_SUCCESS) {
-  //   return {
-  //     ...state,
-  //     isLoading: false,
-  //     token: action.payload.token,
-  //     user: action.payload.user,
-  //     userLocation: action.payload.location,
-  //     jobLocation: action.payload.location,
-  //     showAlert: true,
-  //     alertType: "success",
-  //     alertText: "User Logged In! Redirecting...",
-  //   };
-  // }
-  // if (action.type === LOGIN_USER_ERROR) {
-  //   return {
-  //     ...state,
-  //     isLoading: false,
-  //     showAlert: true,
-  //     alertType: "danger",
-  //     alertText: action.payload.msg,
-  //   };
-  // }
 
+  if (action.type === HANDLE_CHANGE) {
+    console.log(action.payload.value);
+    //[action.payload.name] [action.payload.name]会根据action.payload.name的值计算出一个属性名，
+    // 并将这个属性名对应的值设置为action.payload.value。相当于通过这种写法动态地给对象添加了一个属性。
+    console.log({ ...state, [action.payload.name]: action.payload.value });
+    return { ...state, [action.payload.name]: action.payload.value };
+  }
+  if (action.type === CLEAR_VALUES) {
+    if (action.type === CLEAR_VALUES) {
+      const initialState = {
+        isEditing: false,
+        editJobId: "",
+        position: "",
+        company: "",
+        jobLocation: state.userLocation,
+        jobType: "full-time",
+        status: "pending",
+      };
+      return { ...state, ...initialState };
+    }
+  }
+
+  if (action.type === CREATE_JOB_BEGIN) {
+    return { ...state, isLoading: true };
+  }
+  if (action.type === CREATE_JOB_SUCCESS) {
+    return {
+      ...state,
+      isLoading: false,
+      showAlert: true,
+      alertType: "success",
+      alertText: "New Job Created!",
+    };
+  }
+  if (action.type === CREATE_JOB_ERROR) {
+    return {
+      ...state,
+      isLoading: false,
+      showAlert: true,
+      alertType: "danger",
+      alertText: action.payload.msg,
+    };
+  }
+
+  if (action.type === GET_JOBS_BEGIN) {
+    return { ...state, isLoading: true, showAlert: false };
+  }
+  if (action.type === GET_JOBS_SUCCESS) {
+    return {
+      ...state,
+      isLoading: false,
+      jobs: action.payload.jobs,
+      totalJobs: action.payload.totalJobs,
+      numOfPages: action.payload.numOfPages,
+    };
+  }
+
+  if (action.type === SET_EDIT_JOB) {
+    const job = state.jobs.find((job) => job._id === action.payload.id);
+    const { _id, position, company, jobLocation, jobType, status } = job;
+    return {
+      ...state,
+      isEditing: true,
+      editJobId: _id,
+      position,
+      company,
+      jobLocation,
+      jobType,
+      status,
+    };
+  }
+  if (action.type === EDIT_JOB_BEGIN) {
+    return { ...state, isLoading: true };
+  }
+  if (action.type === EDIT_JOB_SUCCESS) {
+    return {
+      ...state,
+      isLoading: false,
+      showAlert: true,
+      alertType: "success",
+      alertText: "Job Updated!",
+    };
+  }
+  if (action.type === EDIT_JOB_ERROR) {
+    return {
+      ...state,
+      isLoading: false,
+      showAlert: true,
+      alertType: "danger",
+      alertText: action.payload.msg,
+    };
+  }
+  if (action.type === DELETE_JOB_BEGIN) {
+    return { ...state, isLoading: true };
+  }
   throw new Error(`no such action :${action.type}`);
 };
 export default reducer;

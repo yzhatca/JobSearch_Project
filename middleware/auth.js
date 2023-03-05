@@ -1,11 +1,11 @@
 import jwt from "jsonwebtoken";
-import { UnauthenticatedError } from "../errors/index.js";
+import { UnAuthenticatedError } from "../errors/index.js";
 
 const auth = async (req, res, next) => {
   const authHeader = req.headers.authorization;
   //如果请求头中没有authorization字段，或者authorization字段不是以Bearer开头，抛出错误
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    throw new UnauthenticatedError("Authentication Invalid");
+    throw new UnAuthenticatedError("Authentication Invalid");
   }
   const token = authHeader.split(" ")[1];
   try {
@@ -14,7 +14,7 @@ const auth = async (req, res, next) => {
     req.user = { userId: payload.userId };
     next();
   } catch (error) {
-    throw new UnauthenticatedError("Authentication Invalid");
+    throw new UnAuthenticatedError("Authentication Invalid");
   }
 };
 export default auth;

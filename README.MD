@@ -3290,7 +3290,9 @@ const updateJob = async (req, res) => {
   // check permissions
 
   const updatedJob = await Job.findOneAndUpdate({ _id: jobId }, req.body, {
+    //new选项告诉Mongoose在更新文档后返回更新后的文档。如果new设置为false，则返回更新前的文档。如果new设置为true（默认值），则返回更新后的文档。
     new: true,
+    // runValidators选项告诉Mongoose在更新文档时运行模式的验证器。默认情况下，这个选项是false，这意味着Mongoose不会运行任何验证器。如果您希望在更新文档时运行验证器，请将runValidators选项设置为true
     runValidators: true,
   });
 
@@ -3381,7 +3383,7 @@ import { UnAuthenticatedError } from '../errors/index.js';
 const checkPermissions = (requestUser, resourceUserId) => {
   // if (requestUser.role === 'admin') return
   if (requestUser.userId === resourceUserId.toString()) return;
-  throw new UnauthorizedError('Not authorized to access this route');
+  throw new UnAuthenticatedError('Not authorized to access this route');
 };
 
 export default checkPermissions;
